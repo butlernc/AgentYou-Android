@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Agent You</string>
+    <string name="action_settings">Settings</string>
+
+
+    <!-- Register Screen Strings -->
+    <string name="agents_email_hint">Agent\'s Email</string>
+    <string name="agents_name_hint">Enter Agent Name</string>
+    <string name="password_hint">Enter Password</string>
+    <string name="re_password_hint">Re-Enter Password</string>
+    <string name="create_id">Create ID</string>
+    <string name="create_id_desc">Your next step is to create your Agent Standard Identification Code!</string>
+
+    <!-- Login Screen Strings -->
+    <string name="agents_login_email">Agent\'s Email</string>
+    <string name="agents_login_pass">Agent\'s Password</string>
+    <string name="login_btn">Login</string>
+    <string name="register_btn">Register</string>
+
+    <!-- Dash Board Screen Strings -->
+    <string name="identify_btn_str">Identify an Agent!</string>
+</resources>
