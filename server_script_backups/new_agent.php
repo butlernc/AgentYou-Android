@@ -3,10 +3,11 @@ include_once './DbConnect.php';
 function createNewAgent() {
          $response = array();
         $agent = $_POST["agent"];
-        $hashid = $_POST["hashid"];
+        $email = $_POST["email"];
+        $pass = $_POST["pass"];
                 $db = new DbConnect();
        // mysql query
-        $query = "INSERT INTO basic_user_info (ASIH, NAME) VALUES('$hashid','$agent')";
+        $query = "INSERT INTO basic_user_info (NAME, EMAIL, PASS) VALUES('$agent','$email', '$pass)";
         $result = mysql_query($query) or die(mysql_error());
         if ($result) {
             $response["error"] = false;

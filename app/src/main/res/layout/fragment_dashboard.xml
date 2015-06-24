@@ -24,4 +24,11 @@
         android:text="Tag Agent"
         android:id="@+id/go_to_tag_fragment"
         android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save Image Test"
+        android:id="@+id/test_save_image"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>

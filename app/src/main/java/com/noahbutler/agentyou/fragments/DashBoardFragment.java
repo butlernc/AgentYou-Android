@@ -18,7 +18,7 @@ import com.noahbutler.agentyou.R;
 public class DashBoardFragment extends Fragment {
 
     TextView welcomeText;
-    Button goToTagFragment, goToRegisterFragment;
+    Button goToTagFragment, goToRegisterFragment, saveImageTestButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,6 +45,22 @@ public class DashBoardFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 getFragmentManager().beginTransaction().replace(R.id.main_content_area, new RegisterFragment()).commit();
+            }
+        });
+
+        /* save image to server testing */
+        saveImageTestButton = (Button)rootView.findViewById(R.id.test_save_image);
+
+        saveImageTestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AgentHashCreatingFragment agentHashCreatingFragment = new AgentHashCreatingFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("email", "butlernc@uwec.edu");
+                bundle.putString("agent", "Noah");
+                bundle.putString("pass", "1");
+                agentHashCreatingFragment.setArguments(bundle);
+                getFragmentManager().beginTransaction().replace(R.id.main_content_area, agentHashCreatingFragment).commit();
             }
         });
 

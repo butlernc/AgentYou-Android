@@ -12,7 +12,7 @@ public class Messenger {
 
     Message message;
     Bundle bundle;
-    public static String[] keys = {"HammingResults", "SavedResults"};
+    public static String[] keys = {"HammingResults", "SavedResults", "sendFaceData"};
 
     private void init() {
         message = new Message();
@@ -31,6 +31,13 @@ public class Messenger {
         bundle.putString(keys[1], msg);
         message.setData(bundle);
         Statics.handler.sendMessage(message);
+    }
+
+    public void sendFaceData(String msg) {
+        init();
+        bundle.putString(keys[2], msg);
+        message.setData(bundle);
+        HandlerPool.faceDataHandler.sendMessage(message);
     }
 
 

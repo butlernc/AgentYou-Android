@@ -1,0 +1,5 @@
+{
+  "album": "AgentYou",
+  "msg": "Please put this in a safe place and remember it, you'll need it!",
+  "albumkey": "b2d14c827cead395ececdbfc53db4e5ffcddf81f6841b083704082a1af733eb5"
+}

@@ -1,6 +1,9 @@
 package com.noahbutler.agentyou.fragments;
 
 import android.app.Fragment;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -49,6 +53,23 @@ public class AgentHashCreatingFragment extends Fragment {
         cameraPreview = new CameraPreview(getActivity().getBaseContext(), mainActivity.getCamera());
         /* add the view to the layout on the screen */
         cameraPreviewArea.addView(cameraPreview);
+
+        /* create our button to take our picture */
+        captureButton = (Button)rootView.findViewById(R.id.tag_button);
+        captureButton.setText("Capture");
+        captureButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // get an image from the camera
+                Log.d("TAKE", "taking photo");
+                /* call back will take user to a new fragment */
+                mainActivity.getCamera().takePicture(null, null, mPicture);
+                Log.d("TAKE", "POST TAKE");
+
+            }
+        });
+
         /* create our custom camera callback (gets call when a picture is taken) */
         mPicture = new Camera.PictureCallback() {
 
@@ -56,6 +77,7 @@ public class AgentHashCreatingFragment extends Fragment {
             public void onPictureTaken(byte[] data, Camera camera) {
 
                 File pictureFile = Statics.getOutputMediaFile();
+
                 if (pictureFile == null){
                     Log.d(Statics.LOG, "Error creating media file, check storage permissions: ");
                     return;
@@ -68,9 +90,13 @@ public class AgentHashCreatingFragment extends Fragment {
                     fos.write(data);
                     fos.close();
 
+                    rotatePicture(pictureFile);
+
                     Bundle bundle = new Bundle();
                     bundle.putString("location", pictureFile.getAbsolutePath());
+                    bundle.putString("email", AgentHashCreatingFragment.this.getArguments().getString("email"));
                     bundle.putString("agent", AgentHashCreatingFragment.this.getArguments().getString("agent"));
+                    bundle.putString("pass", AgentHashCreatingFragment.this.getArguments().getString("pass"));
 
                     StorageFragment storageFragment = new StorageFragment();
                     storageFragment.setArguments(bundle);
@@ -85,22 +111,27 @@ public class AgentHashCreatingFragment extends Fragment {
             }
         };
 
-        captureButton = (Button)rootView.findViewById(R.id.tag_button);
-        captureButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // get an image from the camera
-                Log.d("TAKE", "taking photo");
-                /* call back will take user to a new fragment */
-                mainActivity.getCamera().takePicture(null, null, mPicture);
-                Log.d("TAKE", "POST TAKE");
-
-            }
-        });
-
-
         return  rootView;
+    }
+
+    private void rotatePicture(File pictureFile) {
+        /* rotate picture */
+        Bitmap rotatedBitMap, originalBitMap;
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        originalBitMap = BitmapFactory.decodeFile(pictureFile.getAbsolutePath());
+
+        try {
+            rotatedBitMap = Bitmap.createBitmap(originalBitMap, 0, 0, originalBitMap.getWidth(), originalBitMap.getHeight(), matrix, true);
+
+            OutputStream fOut = new FileOutputStream(pictureFile);
+            rotatedBitMap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+            fOut.flush();
+            fOut.close();
+
+        }catch (OutOfMemoryError | IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

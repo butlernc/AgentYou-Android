@@ -3,6 +3,7 @@ package com.noahbutler.agentyou.fragments;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,17 +12,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.noahbutler.agentyou.MainActivity;
+import com.luxand.FSDK;
 import com.noahbutler.agentyou.R;
+import com.noahbutler.agentyou.data.DatabaseStream;
 import com.noahbutler.agentyou.data.Statics;
 import com.noahbutler.agentyou.utilities.db.DatabaseContract;
-import com.noahbutler.agentyou.utilities.photo.AgentHashCompare;
-import com.noahbutler.agentyou.utilities.photo.AgentHashCreator;
+import com.noahbutler.agentyou.utilities.photo.LuxandFace;
+import com.noahbutler.agentyou.utilities.threads.HandlerPool;
 import com.noahbutler.agentyou.utilities.threads.Messenger;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Noah Butler on 3/17/2015.
@@ -51,17 +52,58 @@ public class WaitingFragment extends Fragment {
         Bundle bundle = getArguments();
         fileLocation  = bundle.getString("location");
 
-        /* create an id to test against the database */
-        AgentHashCreator agentHashCreator = new AgentHashCreator(fileLocation);
-        if(agentHashCreator.createHashValueFromImage()) {// creating the id worked
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Looper.prepare();
+//                FaceLinker facePlusLinker = new FaceLinker();
+//                facePlusLinker.recognizeFaceFromImage(fileLocation);
+//            }
+//        });
 
-            String results = agentHashCreator.getResults();
-            Log.d("RES", "HASH CODE: " + results);
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Looper.prepare();
+//                FaceLinker facePlusLinker = new FaceLinker();
+//                facePlusLinker.listAllFaces();
+//            }
+//        });
 
-            /* Get agents in database to test against and then send these results over to be tested */
-            DatabaseContract databaseContract = new DatabaseContract();
-            databaseContract.execute("loadAgents", results);
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                /* grab all face data from database */
+                DatabaseContract databaseContract = new DatabaseContract();
+                databaseContract.execute("getFaceData");
+
+                /* create face data object from picture taken */
+                LuxandFace luxandFace = new LuxandFace();
+                FSDK.FSDK_FaceTemplate currentTemplate = luxandFace.getFaceTemplateFromImage(fileLocation);
+
+                /* create FSDK_Feature object for each row in the database */
+                HashMap<String, ArrayList<String>> faceDataMap = DatabaseStream.EmailFaceData;
+                HashMap<String, FSDK.FSDK_FaceTemplate> faceFeatureMap = new HashMap<>();
+                ArrayList<String> emailKeys = DatabaseStream.emailKeys;
+
+                for(int i = 0; i < emailKeys.size(); i++) {
+                    HashMap<String, String> data = new HashMap<>();
+                    data.put("data", faceDataMap.get(emailKeys.get(i)).get(0));
+                    data.put("bufferLength", faceDataMap.get(emailKeys.get(i)).get(1));
+
+                    FSDK.FSDK_FaceTemplate faceTemplate = luxandFace.prepImageDataFromDB(data);
+                    faceFeatureMap.put(emailKeys.get(i), faceTemplate);
+                }
+
+                /* check for matches */
+                int[] results = new int[emailKeys.size()];
+                for(int i = 0; i < emailKeys.size(); i++) {
+                    results[i] = luxandFace.match(faceFeatureMap.get(emailKeys.get(i)), currentTemplate);
+                    Log.d(Statics.LOG, "results[" + i + "]: " + results[i] + ", Email: " + emailKeys.get(i));
+                }
+            }
+        }).start();
 
         backToDashboardButton.setOnClickListener(new View.OnClickListener() {
             @Override
